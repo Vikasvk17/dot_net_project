@@ -1,0 +1,40 @@
+name: Build and Deploy .NET App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up .NET Core SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Publish
+      run: dotnet publish --configuration Release --output ./publish
+
+    - name: Deploy to FTP Server
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+      with:
+        server: ftpupload.net                # FTP server hostname
+        username: ${{ secrets.FTP_USER }}    # FTP username (e.g., 'if0_37760275')
+        password: ${{ secrets.FTP_PASS }}    # FTP password (store in GitHub Secrets)
+        local-dir: '/pages/'              # Local directory to upload (ensure it ends with a /)
+        server-dir: '/htdocs/'               # Destination directory on the FTP server (ensure it ends with a /)
+        protocol: 'ftp'                      # Use 'ftp' for regular FTP, 'sftp' for secure FTP
+        port: 21                             # Default FTP port (usually 21)
+        log-level: 'debug'                   # Optional: to log FTP actions for debugging purposes
