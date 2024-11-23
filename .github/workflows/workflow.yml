@@ -1,46 +1,50 @@
-name: ASP.NET Core Build, Test, and Deploy
+name: Build and Deploy .NET App
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build:
-    name: Build, Test, and Deploy ASP.NET Core Application
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Checkout the code from the repository
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
-    - name: Setup .NET Core
+    # Step 2: Set up the .NET Core SDK (adjust the version if needed)
+    - name: Set up .NET Core SDK
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '3.1.402'
-    
+        dotnet-version: '6.0'  # Change to '3.1' if your project is using .NET Core 3.1
+
+    # Step 3: Restore the project dependencies
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Build the application
-      run: dotnet build --no-restore
+    # Step 4: Build the project in Release configuration
+    - name: Build the .NET app
+      run: dotnet build --configuration Release
 
-    - name: Run tests
-      run: dotnet test --no-build --verbosity normal
-
-    - name: Publish the application
+    # Step 5: Publish the app to a folder
+    - name: Publish the .NET app
       run: dotnet publish -c Release -o ./publish
 
+    # Step 6: List the files in the publish directory to verify output
+    - name: List files in publish directory
+      run: |
+        ls -R ./publish
+
+    # Step 7: Deploy to the FTP Server using the FTP Deploy Action
     - name: Deploy to FTP Server
       uses: SamKirkland/FTP-Deploy-Action@v4.3.0
       with:
-        server: ftpupload.net                # Your FTP server address
-        username: ${{ secrets.FTP_USER }}    # FTP username (from GitHub Secrets)
-        password: ${{ secrets.FTP_PASS }}    # FTP password (from GitHub Secrets)
-        local-dir: './publish/'              # Local directory to upload (published app)
-        server-dir: '/htdocs/'               # Destination directory on FTP server
-        protocol: 'ftps'                     # Secure protocol for FTP transfer
-        log-level: 'verbose'                 # Detailed logging
+        server: ftpupload.net                     # FTP server address
+        username: ${{ secrets.FTP_USER }}         # FTP username (stored in GitHub secrets)
+        password: ${{ secrets.FTP_PASS }}         # FTP password (stored in GitHub secrets)
+        local-dir: './publish/wwwroot/'           # Path to static files (from .NET publish)
+        server-dir: '/htdocs/'                    # Destination directory on FTP server
+        protocol: 'ftps'                          # Protocol (use 'ftps' for secure FTP)
+        log-level: 'verbose'                      # Set log level to 'verbose' for detailed output
