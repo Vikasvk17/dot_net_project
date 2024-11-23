@@ -44,7 +44,7 @@ jobs:
         server: ftpupload.net                     # FTP server address
         username: ${{ secrets.FTP_USER }}         # FTP username (stored in GitHub secrets)
         password: ${{ secrets.FTP_PASS }}         # FTP password (stored in GitHub secrets)
-        local-dir: '/Pages/'           # Path to static files (from .NET publish)
+        local-dir: './Publish/Pages/'           # Path to static files (from .NET publish)
         server-dir: '/htdocs/'                    # Destination directory on FTP server
         protocol: 'ftps'                          # Protocol (use 'ftps' for secure FTP)
         log-level: 'verbose'                      # Set log level to 'verbose' for detailed output
